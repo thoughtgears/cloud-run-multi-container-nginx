@@ -1,0 +1,43 @@
+version: 3
+
+dotenv: [ '.env', '{{.ENV}}/.env.', '{{.HOME}}/.env' ]
+
+# Dynamic variables for the task runners
+vars:
+  GIT_COMMIT:
+    sh: git log -n 1 --format=%h
+  GIT_REPO:
+    sh: git config --get remote.origin.url | sed -e 's#^.*:##' -e 's#.git$##' -e 's#//github.com/*##'
+  GIT_REPO_NAME:
+    sh: echo {{.GIT_REPO}} | sed -e 's#^.*/##'
+  GIT_OWNER:
+    sh: echo {{.GIT_REPO}} | sed -e 's#/.*$##'
+  DOCKER_REPO: europe-west1-docker.pkg.dev/shared-services-47252/nginx-poc
+
+
+tasks:
+  default:
+    cmds:
+      - task --list
+
+  build:apis:ping:
+    desc: Build the ping API
+    vars:
+      SERVICE_NAME: ping
+    dir: apis/ping
+    cmds:
+      - docker build --platform linux/amd64 -t {{.DOCKER_REPO }}/{{ .SERVICE_NAME }}:latest .
+      - docker tag {{.DOCKER_REPO}}/{{ .SERVICE_NAME }}:latest {{.DOCKER_REPO}}/{{ .SERVICE_NAME }}:{{.GIT_COMMIT}}
+      - docker push {{.DOCKER_REPO}}/{{ .SERVICE_NAME }}:latest
+      - docker push {{.DOCKER_REPO}}/{{ .SERVICE_NAME }}:{{.GIT_COMMIT}}
+
+  build:apis:users:
+    desc: Build the users API
+    vars:
+      SERVICE_NAME: users
+    dir: apis/users
+    cmds:
+      - docker build --platform linux/amd64 -t {{.DOCKER_REPO }}/{{ .SERVICE_NAME }}:latest .
+      - docker tag {{.DOCKER_REPO}}/{{ .SERVICE_NAME }}:latest {{.DOCKER_REPO}}/{{ .SERVICE_NAME }}:{{.GIT_COMMIT}}
+      - docker push {{.DOCKER_REPO}}/{{ .SERVICE_NAME }}:latest
+      - docker push {{.DOCKER_REPO}}/{{ .SERVICE_NAME }}:{{.GIT_COMMIT}}
