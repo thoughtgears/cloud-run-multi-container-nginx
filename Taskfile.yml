@@ -12,7 +12,7 @@ vars:
     sh: echo {{.GIT_REPO}} | sed -e 's#^.*/##'
   GIT_OWNER:
     sh: echo {{.GIT_REPO}} | sed -e 's#/.*$##'
-  DOCKER_REPO: 'echo ${DOCKER_REPO}'
+  DOCKER_REPO: ${DOCKER_REPO}
 
 
 tasks:
@@ -25,7 +25,7 @@ tasks:
     vars:
       SERVICE_NAME: ping
     cmds:
-      - docker build --platform linux/amd64 --build-arg SERVICE_PATH=apis/ping  --build-arg SRC_PATH={{ .GIT_REPO }} -f ping.dockerfile -t {{.DOCKER_REPO }}/{{ .SERVICE_NAME }}:latest .
+      - docker build --platform linux/amd64 --build-arg SERVICE_PATH=apis/ping --build-arg SRC_PATH={{ .GIT_REPO }} -f ping.dockerfile -t {{.DOCKER_REPO }}/{{ .SERVICE_NAME }}:latest .
       - docker tag {{.DOCKER_REPO}}/{{ .SERVICE_NAME }}:latest {{.DOCKER_REPO}}/{{ .SERVICE_NAME }}:{{.GIT_COMMIT}}
       - docker push {{.DOCKER_REPO}}/{{ .SERVICE_NAME }}:latest
       - docker push {{.DOCKER_REPO}}/{{ .SERVICE_NAME }}:{{.GIT_COMMIT}}
@@ -35,7 +35,7 @@ tasks:
     vars:
       SERVICE_NAME: users
     cmds:
-      - docker build --platform linux/amd64 --build-arg SERVICE_PATH=apis/users  --build-arg SRC_PATH={{ .GIT_REPO }} -f users.dockerfile -t {{.DOCKER_REPO }}/{{ .SERVICE_NAME }}:latest .
+      - docker build --platform linux/amd64 --build-arg SERVICE_PATH=apis/users --build-arg SRC_PATH={{ .GIT_REPO }} -f users.dockerfile -t {{.DOCKER_REPO }}/{{ .SERVICE_NAME }}:latest .
       - docker tag {{.DOCKER_REPO}}/{{ .SERVICE_NAME }}:latest {{.DOCKER_REPO}}/{{ .SERVICE_NAME }}:{{.GIT_COMMIT}}
       - docker push {{.DOCKER_REPO}}/{{ .SERVICE_NAME }}:latest
       - docker push {{.DOCKER_REPO}}/{{ .SERVICE_NAME }}:{{.GIT_COMMIT}}
@@ -50,9 +50,91 @@ tasks:
       - docker push {{.DOCKER_REPO}}/{{ .SERVICE_NAME }}:latest
       - docker push {{.DOCKER_REPO}}/{{ .SERVICE_NAME }}:{{.GIT_COMMIT}}
 
+  build:frontend:
+    desc: Build the frontend
+    vars:
+      SERVICE_NAME: frontend
+    cmds:
+      - docker build --platform linux/amd64 -f frontend.dockerfile -t {{.DOCKER_REPO }}/{{ .SERVICE_NAME }}:latest .
+      - docker tag {{.DOCKER_REPO}}/{{ .SERVICE_NAME }}:latest {{.DOCKER_REPO}}/{{ .SERVICE_NAME }}:{{.GIT_COMMIT}}
+      - docker push {{.DOCKER_REPO}}/{{ .SERVICE_NAME }}:latest
+      - docker push {{.DOCKER_REPO}}/{{ .SERVICE_NAME }}:{{.GIT_COMMIT}}
+
   build:all:
     desc: Build all APIs
     cmds:
       - task build:apis:ping
       - task build:apis:users
       - task build:proxy
+      - task build:frontend
+
+  deploy:apis:ping:
+    desc: Deploy the ping API
+    vars:
+      SERVICE_NAME: ping
+    cmds:
+      - |
+        gcloud run deploy {{ .SERVICE_NAME }} \
+          --image {{.DOCKER_REPO}}/{{ .SERVICE_NAME }}:{{.GIT_COMMIT}} \
+          --platform managed \
+          --region ${GCP_REGION} \
+          --no-allow-unauthenticated \
+          --set-env-vars GIN_MODE=release \
+          --project ${GCP_PROJECT_ID} \
+          --service-account run-nginx-poc@${GCP_PROJECT_ID}.iam.gserviceaccount.com \
+          --quiet
+
+  deploy:apis:users:
+    desc: Deploy the users API
+    vars:
+      SERVICE_NAME: users
+    cmds:
+      - |
+        gcloud run deploy {{ .SERVICE_NAME }} \
+          --image {{.DOCKER_REPO}}/{{ .SERVICE_NAME }}:{{.GIT_COMMIT}} \
+          --platform managed \
+          --region ${GCP_REGION} \
+          --no-allow-unauthenticated \
+          --set-env-vars GIN_MODE=release \
+          --project ${GCP_PROJECT_ID} \
+          --service-account run-nginx-poc@${GCP_PROJECT_ID}.iam.gserviceaccount.com \
+          --quiet
+
+  deploy:proxy:
+    desc: Deploy the API proxy
+    vars:
+      SERVICE_NAME: proxy
+    cmds:
+      - |
+        gcloud run deploy {{ .SERVICE_NAME }} \
+          --image {{.DOCKER_REPO}}/{{ .SERVICE_NAME }}:{{.GIT_COMMIT}} \
+          --platform managed \
+          --region ${GCP_REGION} \
+          --no-allow-unauthenticated \
+          --project ${GCP_PROJECT_ID} \
+          --service-account run-nginx-poc@${GCP_PROJECT_ID}.iam.gserviceaccount.com \
+          --quiet
+
+  deploy:frontend:
+    desc: Deploy the frontend
+    vars:
+      SERVICE_NAME: frontend
+    cmds:
+      - |
+        gcloud run deploy {{ .SERVICE_NAME }} \
+          --image {{.DOCKER_REPO}}/{{ .SERVICE_NAME }}:{{.GIT_COMMIT}} \
+          --platform managed \
+          --region ${GCP_REGION} \
+          --allow-unauthenticated \
+          --set-env-vars VITE_API_BASE_URL=https://api.thoughtgears.dev \
+          --project ${GCP_PROJECT_ID} \
+          --service-account run-nginx-poc@${GCP_PROJECT_ID}.iam.gserviceaccount.com \
+          --quiet
+
+  deploy:all:
+    desc: Deploy all services
+    cmds:
+      - task deploy:apis:ping
+      - task deploy:apis:users
+      - task deploy:proxy
+      - task deploy:frontend
