@@ -1,0 +1,54 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: ./frontend.dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      VITE_API_BASE_UR: http://proxy:8080
+    networks:
+      - app-network
+    depends_on:
+      - users
+      - ping
+      - proxy
+
+  proxy:
+    build:
+      context: .
+      dockerfile: ./proxy.dockerfile
+      args:
+          SERVICE_PATH: apis/proxy
+          SRC_PATH: thoughtgears/cloud-run-multi-container-nginx
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./proxy/nginx.local.conf:/etc/nginx/conf.d/proxy.conf:ro
+    networks:
+    - app-network
+
+  users:
+    build:
+      context: .
+      dockerfile: ./users.dockerfile
+      args:
+        SERVICE_PATH: apis/users
+        SRC_PATH: thoughtgears/cloud-run-multi-container-nginx
+    networks:
+      - app-network
+
+  ping:
+    build:
+      context: .
+      dockerfile: ./ping.dockerfile
+      args:
+        SERVICE_PATH: apis/ping
+        SRC_PATH: thoughtgears/cloud-run-multi-container-nginx
+    networks:
+      - app-network
+
+
+networks:
+  app-network:
+    driver: bridge
