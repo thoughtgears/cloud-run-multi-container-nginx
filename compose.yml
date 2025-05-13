@@ -3,10 +3,10 @@ services:
     build:
       context: .
       dockerfile: ./frontend.dockerfile
+      args:
+        MODE: development
     ports:
       - "3000:3000"
-    environment:
-      VITE_API_BASE_UR: http://proxy:8080
     volumes:
       - ./frontend/nginx.local.conf:/etc/nginx/conf.d/frontend.conf:ro
     networks:

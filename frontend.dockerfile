@@ -2,10 +2,13 @@ FROM node:lts-alpine AS builder
 
 WORKDIR /app
 
+ARG MODE=development
+
 COPY frontend/package*.json ./
 RUN npm install
 COPY frontend/ .
-RUN npm run build
+RUN npx tsc -b && \
+    npx vite build --mode $MODE
 
 FROM nginx:stable-alpine AS artifact
 

@@ -55,7 +55,7 @@ tasks:
     vars:
       SERVICE_NAME: frontend
     cmds:
-      - docker build --platform linux/amd64 -f frontend.dockerfile -t {{.DOCKER_REPO }}/{{ .SERVICE_NAME }}:latest .
+      - docker build --platform linux/amd64 --build-arg MODE=production -f frontend.dockerfile -t {{.DOCKER_REPO }}/{{ .SERVICE_NAME }}:latest .
       - docker tag {{.DOCKER_REPO}}/{{ .SERVICE_NAME }}:latest {{.DOCKER_REPO}}/{{ .SERVICE_NAME }}:{{.GIT_COMMIT}}
       - docker push {{.DOCKER_REPO}}/{{ .SERVICE_NAME }}:latest
       - docker push {{.DOCKER_REPO}}/{{ .SERVICE_NAME }}:{{.GIT_COMMIT}}
@@ -126,7 +126,6 @@ tasks:
           --platform managed \
           --region ${GCP_REGION} \
           --allow-unauthenticated \
-          --set-env-vars VITE_API_BASE_URL=https://api.thoughtgears.dev \
           --project ${GCP_PROJECT_ID} \
           --service-account run-nginx-poc@${GCP_PROJECT_ID}.iam.gserviceaccount.com \
           --quiet

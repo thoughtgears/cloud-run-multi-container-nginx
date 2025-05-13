@@ -17,6 +17,7 @@ function App() {
   const [usersError, setUsersError] = useState<string | null>(null)
 
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || ''
+  console.log('apiBaseUrl', apiBaseUrl)
 
   const handlePing = async () => {
     try {
