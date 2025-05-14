@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/thoughtgears/cloud-run-multi-container-nginx/pkg/router/middleware"
+	"github.com/thoughtgears/cloud-run-multi-container-nginx/apis/users/pkg/router/middleware"
 )
 
 type Router struct {

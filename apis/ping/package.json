@@ -1,0 +1,13 @@
+{
+  "name": "ping",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}

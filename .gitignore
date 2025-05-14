@@ -2,3 +2,5 @@
 .env
 .env.*.local
 nginx.proxy.conf
+
+node_modules

@@ -5,7 +5,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/thoughtgears/cloud-run-multi-container-nginx/apis/users/handlers"
-	"github.com/thoughtgears/cloud-run-multi-container-nginx/pkg/router"
+	"github.com/thoughtgears/cloud-run-multi-container-nginx/apis/users/pkg/router"
 )
 
 var Config struct {

@@ -1,32 +1,27 @@
-##########################################
-# Builder image to build the application #
-##########################################
-FROM golang:1.24-alpine AS builder
+# ---- Base Stage ----
+FROM node:22-alpine AS base
+WORKDIR /usr/src/app
+COPY ./apis/ping/package*.json ./
 
-ARG SRC_PATH
-ARG SERVICE_PATH
+# ---- Dependencies Stage ----
+FROM base AS dependencies
+RUN npm install --only=production --no-package-lock
 
-RUN apk add --no-cache upx=4.2.4-r0
 
-WORKDIR /go/src/github.com/${SRC_PATH}
+# ---- Build/Source Stage ----
+# Copy the rest of your application's source code.
+FROM base AS source_builder
+COPY ./apis/ping/src/ ./src/
 
-COPY go.mod go.sum ./
-RUN go mod download
-COPY . .
+# ---- Production Stage ----
+FROM node:22-alpine AS artifact
+WORKDIR /usr/src/app
+ENV NODE_ENV=production
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o builds/app-linux-amd64 ./${SERVICE_PATH} && \
-    upx --best --lzma builds/app-linux-amd64
-
-##########################################
-# Final image to run the application     #
-##########################################
-FROM gcr.io/distroless/static-debian12@sha256:3d0f463de06b7ddff27684ec3bfd0b54a425149d0f8685308b1fdf297b0265e9 AS artifact
-
-ARG SRC_PATH
-
-WORKDIR /app/
-COPY --from=builder /go/src/github.com/${SRC_PATH}/builds/app-linux-amd64 ./app
+COPY --from=dependencies /usr/src/app/node_modules ./node_modules
+COPY --from=source_builder /usr/src/app/src/index.js ./index.js
+COPY --from=source_builder /usr/src/app/package.json ./package.json
 
 EXPOSE 8080
 
-CMD ["./app"]
+CMD ["node", "index.js"]
