@@ -64,6 +64,21 @@ task build:all # build and push all images
 task deploy:all # deploy all images to Cloud Run
 ```
 
+## GCP Setup
+
+1. Create a GCP project
+2. Enable the following APIs:
+   - Cloud Run
+   - Artifact Registry
+   - Container Registry
+3. Create a service account `run-nginx-poc` with the following roles:
+   - Cloud Run Invoker
+   - Service Account User
+   - Artifact Registry Reader
+   - Firebase Admin SDK Administrator
+4. Create a Firebase project and link it to the GCP project
+5. Create an Artifact Registry repository for the Docker images
+
 ## Current Status
 
 * Works in local dev `compose`

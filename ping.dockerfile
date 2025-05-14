@@ -19,9 +19,9 @@ WORKDIR /usr/src/app
 ENV NODE_ENV=production
 
 COPY --from=dependencies /usr/src/app/node_modules ./node_modules
-COPY --from=source_builder /usr/src/app/src/index.js ./index.js
+COPY --from=source_builder /usr/src/app/src/ ./src
 COPY --from=source_builder /usr/src/app/package.json ./package.json
 
 EXPOSE 8080
 
-CMD ["node", "index.js"]
+CMD ["node", "src/index.js"]

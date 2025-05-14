@@ -86,6 +86,7 @@ tasks:
     desc: Deploy the ping API
     vars:
       SERVICE_NAME: ping
+      PROJECT_ID: ${GCP_PROJECT_ID}
     cmds:
       - |
         gcloud run deploy {{ .SERVICE_NAME }} \
@@ -93,7 +94,7 @@ tasks:
           --platform managed \
           --region ${GCP_REGION} \
           --allow-unauthenticated \
-          --set-env-vars GIN_MODE=release \
+          --set-env-vars GIN_MODE=release,FIREBASE_PROJECT_ID={{ .PROJECT_ID }} \
           --project ${GCP_PROJECT_ID} \
           --service-account run-nginx-poc@${GCP_PROJECT_ID}.iam.gserviceaccount.com \
           --quiet

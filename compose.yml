@@ -47,6 +47,13 @@ services:
       args:
         SERVICE_PATH: apis/ping
         SRC_PATH: thoughtgears/cloud-run-multi-container-nginx
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /config/application_default_credentials.json
+      FIREBASE_PROJECT_ID: ${GCP_PROJECT_ID}
+    ports:
+      - "8081:8080"
+    volumes:
+      - ~/.config/gcloud:/config:ro
     networks:
       - app-network
 
