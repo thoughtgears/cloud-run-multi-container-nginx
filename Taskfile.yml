@@ -14,11 +14,23 @@ vars:
     sh: echo {{.GIT_REPO}} | sed -e 's#/.*$##'
   DOCKER_REPO: ${DOCKER_REPO}
 
-
 tasks:
   default:
     cmds:
       - task --list
+
+  prepare:proxy:
+    desc: Prepare the proxy configuration
+    dir: proxy
+    vars:
+      USERS_SERVICE: $USERS_SERVICE
+      PING_SERVICE: $PING_SERVICE
+    cmds:
+      - echo {{ .USERS_SERVICE }}
+      - rm -rf nginx.proxy.conf
+      - cp nginx.template.conf nginx.proxy.conf
+      - sed -i "" "s|users-service|{{ .USERS_SERVICE }}|" nginx.proxy.conf
+      - sed -i "" "s|ping-service|{{ .PING_SERVICE }}|" nginx.proxy.conf
 
   build:apis:ping:
     desc: Build the ping API
@@ -78,7 +90,7 @@ tasks:
           --image {{.DOCKER_REPO}}/{{ .SERVICE_NAME }}:{{.GIT_COMMIT}} \
           --platform managed \
           --region ${GCP_REGION} \
-          --no-allow-unauthenticated \
+          --allow-unauthenticated \
           --set-env-vars GIN_MODE=release \
           --project ${GCP_PROJECT_ID} \
           --service-account run-nginx-poc@${GCP_PROJECT_ID}.iam.gserviceaccount.com \
@@ -94,7 +106,7 @@ tasks:
           --image {{.DOCKER_REPO}}/{{ .SERVICE_NAME }}:{{.GIT_COMMIT}} \
           --platform managed \
           --region ${GCP_REGION} \
-          --no-allow-unauthenticated \
+          --allow-unauthenticated \
           --set-env-vars GIN_MODE=release \
           --project ${GCP_PROJECT_ID} \
           --service-account run-nginx-poc@${GCP_PROJECT_ID}.iam.gserviceaccount.com \
@@ -110,7 +122,7 @@ tasks:
           --image {{.DOCKER_REPO}}/{{ .SERVICE_NAME }}:{{.GIT_COMMIT}} \
           --platform managed \
           --region ${GCP_REGION} \
-          --no-allow-unauthenticated \
+          --allow-unauthenticated \
           --project ${GCP_PROJECT_ID} \
           --service-account run-nginx-poc@${GCP_PROJECT_ID}.iam.gserviceaccount.com \
           --quiet

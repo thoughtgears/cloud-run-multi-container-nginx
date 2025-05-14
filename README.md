@@ -51,6 +51,8 @@ This is the required `.env` file for building and pushing the images:
 DOCKER_REPO=my-full-repo-path
 GCP_REGION=service-region
 GCP_PROJECT_ID=service-project-id
+USERS_SERVICE=user-service-run.app# for preparing the proxy config
+PING_SERVICE=ping-service-run.app# for preparing the proxy config
 ```
 
 ```shell
