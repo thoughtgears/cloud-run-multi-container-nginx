@@ -21,7 +21,6 @@ services:
       context: .
       dockerfile: ./proxy.dockerfile
       args:
-          SERVICE_PATH: apis/proxy
           SRC_PATH: thoughtgears/cloud-run-multi-container-nginx
     ports:
       - "8080:8080"
@@ -44,9 +43,6 @@ services:
     build:
       context: .
       dockerfile: ./ping.dockerfile
-      args:
-        SERVICE_PATH: apis/ping
-        SRC_PATH: thoughtgears/cloud-run-multi-container-nginx
     environment:
       GOOGLE_APPLICATION_CREDENTIALS: /config/application_default_credentials.json
       FIREBASE_PROJECT_ID: ${GCP_PROJECT_ID}

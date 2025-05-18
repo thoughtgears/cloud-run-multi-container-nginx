@@ -59,7 +59,7 @@ tasks:
     deps:
       - prepare:proxy
     cmds:
-      - docker build --platform linux/amd64 -f proxy.dockerfile -t {{.DOCKER_REPO }}/{{ .SERVICE_NAME }}:latest .
+      - docker build --platform linux/amd64 --build-arg SRC_PATH={{ .GIT_REPO }} -f proxy.dockerfile -t {{.DOCKER_REPO }}/{{ .SERVICE_NAME }}:latest .
       - docker tag {{.DOCKER_REPO}}/{{ .SERVICE_NAME }}:latest {{.DOCKER_REPO}}/{{ .SERVICE_NAME }}:{{.GIT_COMMIT}}
       - docker push {{.DOCKER_REPO}}/{{ .SERVICE_NAME }}:latest
       - docker push {{.DOCKER_REPO}}/{{ .SERVICE_NAME }}:{{.GIT_COMMIT}}

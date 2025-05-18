@@ -1,7 +1,7 @@
 import admin from 'firebase-admin';
 
 const firebaseAuthMiddleware = async (req, res, next) => {
-    const authHeader = req.headers.authorization;
+    const authHeader = req.headers['x-firebase-authorization'];
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({ message: 'Unauthorized: No token provided or incorrect format.' });
