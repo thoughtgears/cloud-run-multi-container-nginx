@@ -4,8 +4,6 @@ This project demonstrates a multi-container application using Go (Gin), NodeJs w
 orchestrated with Docker Compose. The main POC will be to run NGINX as a API proxy in Cloud Run to support the Frontend 
 with the Backend API.
 
-Example of the deployment can be found at [https://portal.thoughtgears.dev](https://portal.thoughtgears.dev).
-
 <img src="assets/images/nginx-poc.png" alt="Description" width="50%" />
 
 ## Project Structure
