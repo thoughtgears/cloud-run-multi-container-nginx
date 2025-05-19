@@ -1,6 +1,8 @@
 # -- Auth Helper Build Stage --
 FROM golang:1.24-alpine AS builder
 
+RUN apk add --no-cache upx=4.2.4-r0
+
 ARG SRC_PATH
 
 WORKDIR /go/src/github.com/${SRC_PATH}/proxy/auth_helper
@@ -12,7 +14,8 @@ COPY proxy/auth_helper/handlers ./handlers
 COPY proxy/auth_helper/config ./config
 COPY proxy/auth_helper/services ./services
 
-RUN CGO_ENABLED=0 GOOS=linux go build -a -ldflags="-s -w" -o auth_helper_go .
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -ldflags="-s -w" -o auth_helper_go . && \
+     upx --best --lzma auth_helper_go
 
 # -- Artifact Stage --
 FROM nginx:1.28-alpine AS artifact
